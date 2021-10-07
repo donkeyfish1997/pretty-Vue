@@ -1,8 +1,36 @@
 <script>
-export default {};
+export default {
+  data() {
+    return {
+      navColor: false,
+    };
+  },
+  mounted() {
+    this.handalNavColor()
+    window.addEventListener("scroll", this.handalNavColor);
+  },
+  destroyed() {
+    window.removeEventListener("scroll", this.handalNavColor);
+  },
+  methods: {
+    handalNavColor(event) {
+        console.log(window.pageYOffset > 200 , document.body.clientWidth<768)
+      if (window.pageYOffset > 200 || document.body.clientWidth<768) {
+        
+        this.navColor = true;
+      } else {
+
+        this.navColor = false;
+      }
+    },
+  },
+};
 </script>
 <template>
-  <nav class="navbar fixed-top navbar-expand-md navbar-light">
+  <nav
+    class="navbar fixed-top navbar-expand-md navbar-light"
+    :class="{ navColor: navColor }"
+  >
     <div class="container-fluid">
       <a class="navbar-brand" href="#">Navbar</a>
       <button
@@ -52,28 +80,15 @@ export default {};
       </div>
     </div>
   </nav>
-  <!-- 
-
-          <ul class="navbar-nav">
-          <li class="nav-item" v-show="!username">
-            <router-link to="/login" class="nav-link">login</router-link>
-          </li>
-          <li class="nav-item" v-show="username">
-            <router-link to="/logout" class="nav-link">logout</router-link>
-          </li>
-          <li class="nav-item" v-show="!username">
-            <router-link to="/register" class="nav-link">register</router-link>
-          </li>
-          <li class="nav-item d-flex" v-if="username">
-            <router-link to="/user" class="nav-link active"
-              >hi~ {{ username }}
-            </router-link>
-            <router-link v-if="username" to="/user" class="avatar ms-1">
-              <img v-if="false" :src="avatarPath" alt="" />
-            </router-link>
-          </li>
-        </ul> -->
 </template>
 
-<style>
+<style lang="scss" scoped>
+.navbar {
+  transition: .8s;
+}
+.navColor {
+  background-color: #f8f9fa;
+
+    box-shadow: 0px 0px 5px #3a3a3a;
+}
 </style>
