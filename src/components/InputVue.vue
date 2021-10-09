@@ -23,7 +23,7 @@ export default {
 };
 </script>
 <template>
-  <div class="form-floating">
+  <form class="form-floating">
     <input
       :type="info.type"
       :class="['form-control', { 'is-invalid': info.err }]"
@@ -31,7 +31,8 @@ export default {
       :placeholder="info.name"
       :value="message"
       @input="$emit('update:message', $event.target.value)"
+      autocomplete="on"
     />
     <label :for="info.name">{{ text }}</label>
-  </div>
+  </form>
 </template>

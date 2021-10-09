@@ -9,6 +9,8 @@ import "normalize.css";
 import BootstrapVue3 from "bootstrap-vue-3";
 import "bootstrap/dist/css/bootstrap.css";
 import "bootstrap-vue-3/dist/bootstrap-vue-3.css";
+import "bootstrap/dist/css/bootstrap.min.css";
+import "bootstrap/dist/js/bootstrap.min.js";
 // importing AOS
 import AOS from "aos";
 import "aos/dist/aos.css";
@@ -16,8 +18,12 @@ AOS.init();
 // fontawesome
 import { library } from "@fortawesome/fontawesome-svg-core";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
-import { faUserFriends,faComments } from "@fortawesome/free-solid-svg-icons";
-library.add(faUserFriends,faComments);
+import {
+  faUserFriends,
+  faComments,
+  faShoppingCart,
+} from "@fortawesome/free-solid-svg-icons";
+library.add(faUserFriends, faComments, faShoppingCart);
 
 createApp(App)
   .use(store)

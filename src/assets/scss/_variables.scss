@@ -4,6 +4,9 @@ $color-gray: #dadada;
 .main-color {
   color: $main-color;
 }
+.main-color-bg {
+  background-color: $main-color;
+}
 html {
   font-size: 16px;
 }

@@ -3,7 +3,7 @@ import Home from "../views/Home.vue";
 import Search from "../views/Search.vue";
 import Product from "../views/Product.vue";
 import Login from "../views/Login.vue";
-import Logout from "../views/Logout.vue";
+
 import Register from "../views/Register.vue";
 import User from "../views/User.vue";
 import Order from "../views/User/Order";
@@ -17,7 +17,7 @@ const routes = [
     component: Home,
   },
   {
-    path: "/search",
+    path: "/search/:keyword?",
     name: "Search",
     component: Search,
     meta: {
@@ -33,11 +33,6 @@ const routes = [
     path: "/login",
     name: "Login",
     component: Login,
-  },
-  {
-    path: "/logout",
-    name: "Logout",
-    component: Logout,
   },
   {
     path: "/register",

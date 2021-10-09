@@ -7,7 +7,7 @@ export default {
     "my-upload": myUpload,
   },
   emits: ["getAvatar"],
-  setup(props,{ emit }) {
+  setup(props, { emit }) {
     const show = ref(false);
     const params = {
       token: "123456798",
@@ -30,7 +30,7 @@ export default {
     const cropSuccess = function (img_data_url, field) {
       console.log("-------- crop success --------");
       imgDataUrl.value = img_data_url;
-      console.log(emit)
+      console.log(emit);
       emit("getAvatar", img_data_url);
     };
     /**
@@ -70,12 +70,7 @@ export default {
 };
 </script>
 <template>
-  <a
-    class="btn btn-primary"
-   
-    @click="toggleShow"
-    >設置大頭照</a
-  >
+  <a class="btn main-color-bg text-light" @click="toggleShow">設置大頭照</a>
   <div v-if="imgDataUrl" class="avatar d-inline-block ms-5">
     <img :src="imgDataUrl" />
   </div>

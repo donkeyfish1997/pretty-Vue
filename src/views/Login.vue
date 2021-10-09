@@ -1,31 +1,57 @@
 <script>
-import { reactive } from "@vue/reactivity";
+import { reactive, ref } from "@vue/reactivity";
+import { useRouter } from "vue-router";
 import { useStore } from "vuex";
-// import { login } from "@/api/user";
-import router from "@/router/index.js";
+import { login } from "@/api/user.js";
+import InputVue from "@/components/InputVue.vue";
 
 export default {
+  components: { InputVue },
   setup() {
+    const router = useRouter();
     const store = useStore();
-    const form = reactive({ email: "", password: "" });
-    const errform = reactive({});
+    const isLoad = ref(false);
+    const errText = ref("");
+    const formInfos = reactive({
+      email: { type: "email", name: "信箱", value: "", err: "" },
+      password: { type: "password", name: "再次確認", value: "", err: "" },
+      err: { err: "" },
+    });
     const submit = () => {
-      Object.keys(errform).forEach((el) => {
-        delete errform[el];
+      //取formInfos 裡的 值 formValues
+      let formValues = {};
+      Object.keys(formInfos).forEach((key) => {
+        formValues[key] = formInfos[key].value;
       });
-      login(form)
+      // 刪除 error
+      Object.keys(formInfos).forEach((key) => {
+        formInfos[key].err = "";
+      });
+      errText.value = "";
+      // 正在傳送
+      isLoad.value = true;
+      // api
+      login(formValues)
         .then((res) => {
-          console.log("登入成功");
+          // 成功
+          console.log("loginSus", res);
           store.dispatch("setUsername");
-          router.push({ path: "/" });
+          router.push("/");
         })
         .catch((err) => {
-          Object.keys(err.response.data).forEach((el) => {
-            errform[el] = err.response.data[el];
+          // 失敗
+          console.log("logginErr: ", err.response);
+          // 設置err值
+          Object.keys(err.response.data).forEach((key) => {
+            formInfos[key].err = err.response.data[key];
           });
+        })
+        .finally(() => {
+          //傳送結束
+          isLoad.value = false;
         });
     };
-    return { form, submit, errform };
+    return { formInfos, errText, submit, isLoad };
   },
 };
 </script>
@@ -34,52 +60,37 @@ export default {
   <div class="login d-flex flex-column justify-content-center">
     <div class="container">
       <h1 class="pb-5 text-center">登入頁面</h1>
-      <div class="form-floating mb-3">
-        <input
-          type="text"
-          :class="{ 'is-invalid': errform['email'] }"
-          v-model="form.email"
-          class="form-control"
-          id="email"
-          placeholder="tmp"
-        />
-        <label for="text">{{
-          errform["email"] ? "email" + errform["email"] : "email"
-        }}</label>
-      </div>
-      <div class="form-floating mb-3">
-        <input
-          type="password"
-          :class="{ 'is-invalid': errform['password'] }"
-          v-model="form.password"
-          class="form-control"
-          id="password"
-          placeholder="tmp"
-        />
-        <label for="text">{{
-          errform["password"] ? "password" + errform["password"] : "password"
-        }}</label>
-      </div>
-      <input
-        class="form-control button py-3"
-        type="submit"
-        value="送出"
-        @click="submit"
+
+      <input-vue
+        v-for="info in [formInfos.email, formInfos.password]"
+        :key="info"
+        v-model:message="info.value"
+        :info="info"
+        class="mt-3"
       />
-      <p class="err" v-show="errform.err">{{ errform.err }}</p>
+
+      <!-- 確認Ｆ -->
+      <button class="button text mt-3" @click="submit">確認</button>
+      <img
+        v-show="isLoad"
+        class="ps-5"
+        src="~@/assets/img/Home/isLoad.gif"
+        alt=""
+      />
+      <span class="ms-5 text-danger">
+        {{ formInfos.err.err }}
+      </span>
     </div>
   </div>
-
-  <div class="container"></div>
 </template>
 
 
 
 <style lang="scss" scoped>
-
 .login {
   width: 100vw;
-  height: 100vh;
+  min-height: 100vh;
+  padding-top: 60px;
   background-color: #dadada;
   .container {
     max-width: 700px;
