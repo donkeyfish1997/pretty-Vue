@@ -3,19 +3,25 @@ import $ from "jquery";
 
 import { onMounted, onUnmounted } from "vue";
 import { useRoute } from "vue-router";
-import { addOrder, addCart } from "@/api/userInfo";
-import { searchProject } from "@/api/search";
 import { computed, reactive, ref } from "@vue/reactivity";
 import { useStore } from "vuex";
+//
+import { addOrder, addCart } from "@/api/userInfo";
+import { searchProject } from "@/api/search";
+import modal from "@/components/modal.vue";
+import { Modal } from "bootstrap/dist/js/bootstrap.min.js";
 export default {
+  components: { modal },
   setup() {
     const store = useStore();
     const route = useRoute();
-    const username = computed(() => store.getters.getUsername);
+    const username = computed(() => store.state.username);
     const data = reactive({});
     const modalTitle = ref("");
     const id = route.params.id;
     const isLoad = ref(true);
+    const buyisClick = ref(true);
+    const modalText = ref("");
     searchProject(id)
       .then((res) => {
         data["id"] = res.data.id;
@@ -36,64 +42,94 @@ export default {
         tmp.addClass("iframe");
         tmp.parent().addClass("iframeParent");
       });
-
+    // 增加iframe Css
+    const addIframeCss = () => {
+      let tmp = $(".subIntro iframe");
+      tmp.addClass("iframe");
+      tmp.parent().addClass("iframeParent");
+      $(".subIntro img").css([{ width: "100%" }, { height: "auto" }]);
+    };
+    var showModal;
     onMounted(() => {
-      // 增加iframe Css
-      const addIframeCss = () => {
-        let tmp = $(".subIntro iframe");
-        tmp.addClass("iframe");
-        tmp.parent().addClass("iframeParent");
-        $(".subIntro img").css([{ width: "100%" }, { height: "auto" }]);
-      };
       // 綁定
       $(document).bind("DOMNodeInserted", addIframeCss);
+      //showModal
+      showModal = () => {
+        let tmp = new Modal(document.getElementById("Modal"));
+        tmp.show();
+      };
     });
     onUnmounted(() => {
       $(document).unbind("DOMNodeInserted", addIframeCss);
     });
 
-    const buy = () => {
+    const buySbumit = () => {
+      buyisClick.value = false;
+      modalTitle.value = "";
       if (!username.value) {
-        modalTitle.value = "請先登入";
-      } else {
-        addOrder({
-          productId: data["id"],
-          pic: data["pic"],
-          name: data["name"],
-          price: data["price"],
-        })
-          .then((res) => {
-            console.log(res);
-            modalTitle.value = "購買成功";
-          })
-          .catch((err) => {
-            console.log(err);
-            modalTitle.value = "購買失敗";
-          });
+        modalText.value = "請先登入";
+        showModal();
+        return;
       }
+      buyisClick.value = true;
+      modalText.value = "確定購買？";
+      showModal();
     };
 
-    const cart = () => {
-      if (!username.value) {
-        modalTitle.value = "請先登入";
-      } else {
-        addCart({
-          productId: data["id"],
-          pic: data["pic"],
-          name: data["name"],
-          price: data["price"],
+    const buyConfirm = () => {
+      buyisClick.value = false;
+      addOrder({
+        productId: data["id"],
+        pic: data["pic"],
+        name: data["name"],
+        price: data["price"],
+      })
+        .then((res) => {
+          console.log(res);
+          modalText.value = "購買成功";
         })
-          .then((res) => {
-            console.log(res);
-            modalTitle.value = "已加入購物車";
-          })
-          .catch((err) => {
-            console.log(err);
-            modalTitle.value = "加入購物車失敗";
-          });
-      }
+        .catch((err) => {
+          console.log(err);
+          modalText.value = "購買失敗";
+        });
     };
-    return { data, buy, cart, modalTitle, isLoad };
+
+    const cartSubmit = () => {
+      buyisClick.value = false;
+      modalText.value = "";
+      if (!username.value) {
+        modalText.value = "請先登入";
+        showModal();
+        return;
+      }
+      addCart({
+        productId: data["id"],
+        pic: data["pic"],
+        name: data["name"],
+        price: data["price"],
+      })
+        .then((res) => {
+          console.log(res);
+          modalText.value = "已加入購物車";
+        })
+        .catch((err) => {
+          console.log(err);
+          modalText.value = "加入購物車失敗";
+        })
+        .finally(() => {
+          showModal();
+        });
+    };
+    return {
+      data,
+      buySbumit,
+      cartSubmit,
+      modalTitle,
+      isLoad,
+      modalText,
+      buyisClick,
+      buyConfirm,
+    };
   },
 };
 </script>
@@ -118,8 +154,8 @@ export default {
           <h4>{{ data.price }}</h4>
           <div class="mb-auto" v-html="data.slogan"></div>
           <!-- 按鈕 -->
-          <button class="button my-2" @click="buy">直接購買</button>
-          <button class="button" @click="cart">加入購物車</button>
+          <button class="button my-2" @click="buySbumit">直接購買</button>
+          <button class="button" @click="cartSubmit">加入購物車</button>
         </div>
       </div>
       <!-- 圖片、影片 -->
@@ -128,38 +164,20 @@ export default {
         <img v-if="i.Pic" :src="'https://f.ecimg.tw/' + i.Pic" alt="" />
       </template>
     </div>
+    <modal id="Modal">
+      <template #header> 訊息 </template>
+      <template #body>{{ modalText }} </template>
+      <template #footer>
+        <button
+          v-if="buyisClick"
+          class="btn main-color-bg text-light"
+          @click="buyConfirm"
+        >
+          確認
+        </button>
+      </template>
+    </modal>
   </div>
-  <!-- Modal -->
-  <!-- <div
-    class="modal fade"
-    id="exampleModal"
-    tabindex="-1"
-    aria-labelledby="exampleModalLabel"
-    aria-hidden="true"
-  >
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="exampleModalLabel">{{ modalTitle }}</h5>
-          <button
-            type="button"
-            class="btn-close"
-            data-bs-dismiss="modal"
-            aria-label="Close"
-          ></button>
-        </div>
-        <div class="modal-footer">
-          <button
-            type="button"
-            class="btn btn-secondary"
-            data-bs-dismiss="modal"
-          >
-            Close
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>-->
 </template> 
 <style scoped lang="scss">
 .product {
